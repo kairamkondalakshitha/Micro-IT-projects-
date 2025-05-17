@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Creative Calculator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #f0f0f7;
+      overflow: hidden;
+      padding: 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: url('https://www.transparenttextures.com/patterns/stardust.png');
+      opacity: 0.1;
+      z-index: 0;
+      animation: floatBackground 40s linear infinite;
+    }
+
+    @keyframes floatBackground {
+      0% { background-position: 0 0; }
+      100% { background-position: 1000px 1000px; }
+    }
+
+    .calculator {
+      position: relative;
+      background: #12162e;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 1;
+    }
+
+    .calculator h1 {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 600;
+      background: linear-gradient(45deg, #f9d423, #ff4e50);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    input[type="number"],
+    select,
+    .calculate-btn,
+    .clear-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #2e344e, #1c2035);
+      color: #f0f0f7;
+      box-shadow: inset 4px 4px 8px #1a1e2f, inset -4px -4px 8px #3a4264;
+      outline: none;
+    }
+
+    .calculate-btn,
+    .clear-btn {
+      cursor: pointer;
+      font-weight: 600;
+      color: #222;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .calculate-btn {
+      background: linear-gradient(135deg, #ff4e50, #f9d423);
+    }
+
+    .clear-btn {
+      background: linear-gradient(135deg, #00c9ff, #92fe9d);
+    }
+
+    .calculate-btn:hover,
+    .clear-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .result {
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      padding: 20px;
+      font-size: 1.6rem;
+      text-align: center;
+      font-weight: bold;
+      color: #000;
+      border-radius: 20px;
+      box-shadow: 0 6px 12px rgba(79, 172, 254, 0.4);
+      opacity: 0;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .history {
+      background-color: #1c213b;
+      border-radius: 15px;
+      padding: 15px;
+      color: #d3d9f4;
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
+    }
+
+    .history h2 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #f9d423;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #b0c4de;
+      margin-top: 10px;
+    }
+
+    .history div {
+      padding: 5px 0;
+      border-bottom: 1px solid #f0f0f7;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <h1>Calculator</h1>
+
+    <input type="number" id="num1" placeholder="First number" />
+    <input type="number" id="num2" placeholder="Second number" />
+
+    <select id="operation">
+      <option value="add">➕ Add</option>
+      <option value="subtract">➖ Subtract</option>
+      <option value="multiply">✖️ Multiply</option>
+      <option value="divide">➗ Divide</option>
+    </select>
+
+    <div class="button-row">
+      <button class="calculate-btn" id="calcBtn">Calculate</button>
+      <button class="clear-btn" id="clearBtn">Clear</button>
+    </div>
+
+    <div class="result" id="result">Result will appear here</div>
+
+    <div class="history" id="history">
+      <h2>📝 History</h2>
+      <div id="historyList">No previous calculations yet.</div>
+      <button class="clear-btn" id="resetHistoryBtn" style="margin-top:10px;">Reset History</button>
+    </div>
+
+    <div class="footer">Built with 💡 for math lovers everywhere.</div>
+  </div>
+
+  <script>
+    const num1El = document.getElementById('num1');
+    const num2El = document.getElementById('num2');
+    const operationEl = document.getElementById('operation');
+    const resultEl = document.getElementById('result');
+    const calcBtn = document.getElementById('calcBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const resetHistoryBtn = document.getElementById('resetHistoryBtn');
+    const historyList = document.getElementById('historyList');
+
+    let history = [];
+
+    function calculate() {
+      const val1 = parseFloat(num1El.value);
+      const val2 = parseFloat(num2El.value);
+
+      if (isNaN(val1) || isNaN(val2)) {
+        resultEl.textContent = 'Please enter valid numbers.';
+        resultEl.style.opacity = 1;
+        return;
+      }
+
+      let result;
+      let symbol;
+
+      switch (operationEl.value) {
+        case 'add':
+          result = val1 + val2;
+          symbol = '+';
+          break;
+        case 'subtract':
+          result = val1 - val2;
+          symbol = '−';
+          break;
+        case 'multiply':
+          result = val1 * val2;
+          symbol = '×';
+          break;
+        case 'divide':
+          if (val2 === 0) {
+            resultEl.textContent = 'Cannot divide by zero.';
+            resultEl.style.opacity = 1;
+            return;
+          }
+          result = val1 / val2;
+          symbol = '÷';
+          break;
+      }
+
+      // Round result to 6 decimal places
+      result = Math.round(result * 1000000) / 1000000;
+
+      // Display result with fade effect
+      resultEl.textContent = `Result: ${result}`;
+      resultEl.style.opacity = 0;  // Make it invisible initially
+      setTimeout(() => {
+        resultEl.style.opacity = 1;  // Fade in the result
+      }, 200); // Delay to ensure opacity change is visible
+
+      // Add to history
+      const entry = `${val1} ${symbol} ${val2} = ${result}`;
+      history.unshift(entry);
+      if (history.length > 5) history.pop();  // Limit history to last 5 calculations
+
+      updateHistory();
+    }
+
+    function updateHistory() {
+      if (history.length === 0) {
+        historyList.innerHTML = 'No previous calculations yet.';
+      } else {
+        historyList.innerHTML = history.map(item => `<div>${item}</div>`).join('');
+      }
+    }
+
+    function clearInputs() {
+      num1El.value = '';
+      num2El.value = '';
+      resultEl.textContent = 'Result will appear here';
+      resultEl.style.opacity = 0;
+    }
+
+    function resetHistory() {
+      history = [];
+      updateHistory();
+    }
+
+    // Event listeners
+    calcBtn.addEventListener('click', calculate);
+    clearBtn.addEventListener('click', clearInputs);
+    resetHistoryBtn.addEventListener('click', resetHistory);
+  </script>
+</body>
+</html>
